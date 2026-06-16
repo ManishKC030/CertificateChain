@@ -16,6 +16,49 @@ CertiChain is a decentralized application (DApp) designed to eliminate credentia
 - **Dynamic Theming:** Seamless transition between high-contrast Light and Dark modes.
 - **Instant Verification:** Rapid document authenticity checks via file upload or manual hash entry.
 
+## 🏛️ Architectural Design
+
+CertiChain follows a **Hybrid Decentralized Architecture**, utilizing blockchain for integrity and IPFS for storage.
+
+### System Workflow (Mermaid)
+
+```mermaid
+graph TD
+    A[User/Admin] -->|Upload File| B(Frontend - React)
+    B -->|SHA-256| C{Client-side Hashing}
+    C -->|Binary Hash| D[Metadata Preparation]
+    B -->|Upload File| E[Pinata IPFS]
+    E -->|Return CID| F[Blockchain Transaction]
+    D -->|Hash + CID| F
+    F -->|Store| G[Ethereum Smart Contract]
+    
+    H[Verifier] -->|Upload File| I[Frontend]
+    I -->|SHA-256| J[Client-side Hashing]
+    J -->|Query Hash| G
+    G -->|Return Metadata| I
+    I -->|Fetch Source| E
+```
+
+### Technical Layers
+
+1.  **Presentation Layer (React/Vite):** 
+    -   Handles the **SHA-256 Fingerprinting** locally. The actual document content never leaves the browser until the user initiates the IPFS upload.
+    -   Performs **Role Detection** by querying the smart contract to switch between Admin and Public views.
+
+2.  **Storage Layer (IPFS/Pinata):** 
+    -   Stores the heavyweight certificate files (PDFs/Images).
+    -   Provides a content-addressed URI (CID) which is stored on the blockchain as a pointer to the original document.
+
+3.  **Blockchain Layer (Solidity):**
+    -   **CertificateRegistry.sol**: Acts as the single source of truth.
+    -   Stores mapping of `SHA256_Hash => CertificateMetadata`.
+    -   Enforces **Access Control**, ensuring only authorized addresses (Admins) can modify the registry.
+
+4.  **Security Model:**
+    -   **Collision Resistance:** Uses SHA-256 to ensure each document has a unique fingerprint.
+    -   **Immutability:** Once a hash is recorded on-chain, it cannot be changed or deleted.
+    -   **Integrity:** Verification works by re-hashing a document and comparing it to the on-chain record; any alteration to the document will cause the hash to mismatch.
+
 ## 🛠️ Tech Stack
 
 - **Frontend:** React (Vite), Tailwind CSS 4.0
