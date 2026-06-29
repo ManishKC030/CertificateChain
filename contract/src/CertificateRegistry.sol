@@ -62,7 +62,7 @@ contract CertificateRegistry {
         string memory _studentName,
         string memory _registrationNumber,
         string memory _course,
-        string memory _grade,
+        string memory _grade,       
         string memory _certificateHash,
         string memory _ipfsHash
     ) public onlyAdmin notPaused {
